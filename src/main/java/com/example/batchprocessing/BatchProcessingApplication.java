@@ -1,18 +1,13 @@
 package com.example.batchprocessing;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.batch.core.Job;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -22,24 +17,20 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootApplication
 @EnableConfigurationProperties({BatchProperties.class})
 @Slf4j
-public class BatchProcessingApplication implements CommandLineRunner {
+public class BatchProcessingApplication {
 
-	private final ApplicationContext context;
-	private final Environment environment;
 	private static BatchProperties batchProperties;
 
 	/**
 	 * コンストラクタ
 	 */
-	public BatchProcessingApplication(ApplicationContext context, Environment environment, BatchProperties batchProperties) {
-		this.context = context;
-		this.environment = environment;
+	public BatchProcessingApplication(BatchProperties batchProperties) {
 		BatchProcessingApplication.batchProperties = batchProperties;
 	}
 
 	/**
 	 * mainメソッド（コマンドライン引数例）
-	 *  --spring.batch.job.names=importUserJob
+	 *  --spring.batch.job.name=importUserJob
 	 *  --spring.config.import=optional:classpath:job1.properties,optional:file:job1.properties
 	 *  --spring.profiles.active=dev
 	 */
@@ -54,22 +45,6 @@ public class BatchProcessingApplication implements CommandLineRunner {
 				log.error(e.getMessage());
 			}
 		}
-	}
-
-	/**
-	 * ジョブ実行は、Spring Bootより行われるため、ここではジョブの存在チェックのみ行う
-	 */
-	@Override
-	public void run(String... args) throws Exception {
-		String jobName = environment.getProperty("spring.batch.job.names");
-		Map<String, Job> jobsMap = context.getBeansOfType(Job.class);
-		for (Job job : jobsMap.values()) {
-			if (job.getName().equals(jobName)) {
-				log.info(String.format("%s - %s", batchProperties.getBatchName(), batchProperties.getJobName()));
-				return;
-			}
-		}
-		throw new Exception("該当するジョブが存在しません：" + jobName);
 	}
 
 	/**
