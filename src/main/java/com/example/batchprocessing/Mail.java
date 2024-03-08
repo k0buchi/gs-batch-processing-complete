@@ -1,9 +1,9 @@
 package com.example.batchprocessing;
 
+import javax.mail.internet.InternetAddress;
+
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-
-import jakarta.mail.internet.InternetAddress;
 
 public class Mail {
 

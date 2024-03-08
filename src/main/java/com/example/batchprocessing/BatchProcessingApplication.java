@@ -5,9 +5,11 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -17,24 +19,26 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootApplication
 @EnableConfigurationProperties({BatchProperties.class})
 @Slf4j
-public class BatchProcessingApplication {
+public class BatchProcessingApplication implements CommandLineRunner {
 
+	private final Environment environment;
 	private static BatchProperties batchProperties;
 
 	/**
 	 * コンストラクタ
 	 */
-	public BatchProcessingApplication(BatchProperties batchProperties) {
+	public BatchProcessingApplication(Environment environment, BatchProperties batchProperties) {
+		this.environment = environment;
 		BatchProcessingApplication.batchProperties = batchProperties;
 	}
 
 	/**
 	 * mainメソッド（コマンドライン引数例）
-	 *  --spring.batch.job.name=importUserJob
+	 *  --spring.batch.job.names=importUserJob
 	 *  --spring.config.import=optional:classpath:job1.properties,optional:file:job1.properties
 	 *  --spring.profiles.active=dev
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		try {
 			System.exit(SpringApplication.exit(SpringApplication.run(BatchProcessingApplication.class, args)));
 		} catch (Exception e) {
@@ -44,6 +48,17 @@ public class BatchProcessingApplication {
 			} catch (Exception e1) {
 				log.error(e.getMessage());
 			}
+		}
+	}
+
+	/**
+	 * ジョブ実行は、Spring Bootより行われるため、ここではジョブの指定チェックのみ行う
+	 */
+	@Override
+	public void run(String... args) throws Exception {
+		String jobName = environment.getProperty("spring.batch.job.names");
+		if (jobName == null) {
+			throw new Exception("実行するジョブが指定されていません");
 		}
 	}
 
