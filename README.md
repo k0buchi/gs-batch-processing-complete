@@ -4,7 +4,7 @@
 ## プログラムの引数
 実行時は、以下の引数を指定してください。
 ```bash
---spring.batch.job.names=importUserJob
+--spring.batch.job.name=importUserJob
 --spring.config.import=optional:classpath:job1.properties,optional:file:job1.properties
 --spring.profiles.active=dev
 ```
